@@ -19,7 +19,7 @@ letters AS (
   SELECT split(word,'') letter, word FROM (
     SELECT lower(trim(word)) word, count(*)
     FROM 
-    words,unnest(word) word with offset ordr
+    words,unnest(word) word
     GROUP BY 1)
   )
  select word, count(*) number_of_letters, string_agg(letter, '' order by ordr desc) word_backward from letters, unnest(letter) as letter with offset ordr
