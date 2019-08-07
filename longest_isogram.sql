@@ -29,13 +29,13 @@ letters AS (
     FROM 
     letters, unnest(letter) letter)
   GROUP BY 1
-  having letters_in_word=unique_letters_in_word
+  HAVING letters_in_word=unique_letters_in_word
 )
 
 SELECT 
   isograms.letters_in_word, 
   isograms.word, 
-  array_agg(struct(word_string, original) LIMIT 5)
+  array_agg(struct(word_string, original) LIMIT 5) as source
 FROM isograms
 JOIN (SELECT word, word_string, original FROM words, unnest(word) word) words ON isograms.word=words.word
 WHERE letters_in_word>10
