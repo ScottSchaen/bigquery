@@ -1,36 +1,43 @@
-with sentences as (
+WITH strings_of_words AS (
+  --Put your string of words here. Make sure words are space separated
   SELECT 
-    regexp_replace(title,r'[^A-Za-z]+',' ') as sentence, 
-    title as original_sentence
-    FROM `bigquery-samples.wikipedia_benchmark.Wiki10M` 
-    where language='en'
-  )
-, words as (
-  select split(sentence, ' ') word, sentence, original_sentence
-  from sentences
-)
-, letters as (
-  select split(word,'') letter, word from 
-    (
-    select lower(trim(word)) word, count(*)
-    from 
+    regexp_replace(title,r'[^A-Za-z]+',' ') AS word_string, 
+    title AS original
+  FROM `bigquery-samples.wikipedia_benchmark.Wiki10M` 
+  WHERE language='en'
+  ), 
+words as (
+  --Turn strings of words into one word per row
+  SELECT 
+    split(word_string, ' ') word,
+    word_string, 
+    original
+  FROM strings_of_words
+),
+letters AS (
+  --For each word, break the letters into separate rows
+  SELECT split(word,'') letter, word FROM (
+    SELECT lower(trim(word)) word, count(*)
+    FROM 
     words,unnest(word) word
-    group by 1
-    order by 2 desc
-   )
-   )
-, isograms as (
-  select word, count(*) letters, count(distinct letter) u_letters from
-  (select letter, word
-  from 
-  letters, unnest(letter) letter
-  )
-  group by 1
-  having letters=u_letters
+    GROUP BY 1)
+  ),
+ isograms AS (
+  --Evaluate the letters per word
+  SELECT word, count(*) letters_in_word, count(distinct letter) unique_letters_in_word FROM (
+    SELECT letter, word
+    FROM 
+    letters, unnest(letter) letter)
+  GROUP BY 1
+  having letters_in_word=unique_letters_in_word
 )
-select letters, words.word, array_agg(struct(sentence, original_sentence) limit 5)
-from isograms
-join (select word, sentence, original_sentence from words, unnest(word) word) words on isograms.word=words.word
-where letters>10
-group by 1,2
-order by letters desc
+
+SELECT 
+  isograms.letters_in_word, 
+  isograms.word, 
+  array_agg(struct(word_string, original) LIMIT 5)
+FROM isograms
+JOIN (SELECT word, word_string, original FROM words, unnest(word) word) words ON isograms.word=words.word
+WHERE letters_in_word>10
+GROUP BY 1,2
+ORDER BY letters_in_word DESC
