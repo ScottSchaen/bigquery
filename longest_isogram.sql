@@ -4,7 +4,7 @@ WITH strings_of_words AS (
     regexp_replace(title,r'[^A-Za-z]+',' ') AS word_string, 
     title AS original
   FROM `bigquery-samples.wikipedia_benchmark.Wiki10M` 
-  WHERE language='en'
+  WHERE language='en' AND lower(title) NOT LIKE '%file:%'
   ), 
 words as (
   --Turn strings of words into one word per row
