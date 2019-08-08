@@ -30,7 +30,7 @@ ORDER BY num DESC
 
 
 -- Using an inner join. You lose "2" as a prime on the inner join because there's no divisors less than 2 on the right side.
--- Left join won't work with only inequalities in the ON
+-- Left join would fix "2" problem but it won't work with only inequalities in the ON
 -- This one might be most performant
 WITH numbers AS
 (SELECT num FROM unnest(generate_array(2,10000)) num)
