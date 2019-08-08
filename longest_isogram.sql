@@ -1,7 +1,7 @@
 WITH strings_of_words AS (
   --Put your string of words here. Make sure words are space separated
   SELECT 
-    regexp_replace(title,r'[^A-Za-z]+',' ') AS word_string, 
+    lower(regexp_replace(title,r'[^A-Za-z]+',' ')) AS word_string, 
     title AS original
   FROM `bigquery-samples.wikipedia_benchmark.Wiki10M` 
   WHERE language='en' AND lower(title) NOT LIKE '%file:%'
@@ -14,24 +14,16 @@ words as (
     original
   FROM strings_of_words
 ),
-letters AS (
-  --For each word, break the letters into separate rows
-  SELECT split(word,'') letter, word FROM (
-    SELECT lower(trim(word)) word, count(*)
-    FROM 
-    words,unnest(word) word
-    GROUP BY 1)
-  ),
  isograms AS (
   --Evaluate the letters per word
-  SELECT word, count(*) letters_in_word, count(distinct letter) unique_letters_in_word FROM (
-    SELECT letter, word
-    FROM 
-    letters, unnest(letter) letter)
-  GROUP BY 1
+  SELECT 
+    word, 
+    length(word) letters_in_word,
+    max((SELECT count(DISTINCT letters) FROM unnest(split(word,"")) as letters))   unique_letters_in_word
+    from words, unnest(word) word
+  GROUP BY 1,2
   HAVING letters_in_word=unique_letters_in_word
 )
-
 SELECT 
   isograms.letters_in_word, 
   isograms.word, 
