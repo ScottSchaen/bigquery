@@ -1,0 +1,9 @@
+-- Purpose: Reverses text (or numbers) just for funzies. Can use for finding palindromes.
+-- Replace 'fn' with your own dataset name
+
+CREATE OR REPLACE FUNCTION fn.reverse_text(str ANY type)
+AS ((SELECT string_agg(letters,'' ORDER BY ordr DESC) FROM unnest(split(cast(str AS STRING),"")) letters WITH OFFSET ordr));
+
+
+-- To test it out or use it. 
+SELECT fn.reverse_order('abcdef') letter_reverse, fn.reverse_order(12345) number_reverse
