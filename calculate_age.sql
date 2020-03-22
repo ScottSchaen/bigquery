@@ -9,3 +9,8 @@ FROM
 (
 SELECT date('2000-02-29') AS bday
 )
+
+
+# This solution converts the two dates to a float formatted as yyyy.mmdd and subtracts them. 
+# It looks like:
+# floor(2020.0322 — 2000.0229) = 20
