@@ -1,5 +1,6 @@
 -- Purpose: Reverses text (or numbers) just for funzies. Can use for finding palindromes.
 -- Replace 'fn' with your own dataset name
+-- Update: BigQuery has a reverse() function, cool!
 
 CREATE OR REPLACE FUNCTION fn.reverse_text(str ANY type)
 AS ((SELECT string_agg(letters,'' ORDER BY ordr DESC) FROM unnest(split(cast(str AS STRING),"")) letters WITH OFFSET ordr));
